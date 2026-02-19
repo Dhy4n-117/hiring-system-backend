@@ -29,3 +29,5 @@ const applicationRoutes = require('./routes/applications');
 app.use('/api/applications', applicationRoutes);
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+
+app.use('/api/admin', require('./routes/admin'));

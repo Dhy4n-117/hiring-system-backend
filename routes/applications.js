@@ -35,6 +35,12 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }   // 5 MB max
 });
 
+const auth = require('../middleware/auth'); // Import your new lock
+const { getAllApplications } = require('../controllers/applicationController');
+
+// Add 'auth' between the path and the controller to protect it
+router.get('/all', auth, getAllApplications);
+
 // POST /applications/apply
 router.post('/apply', upload.single('resume'), submitApplication);
 

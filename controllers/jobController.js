@@ -1,9 +1,10 @@
-// controllers/jobController.js  (Role 2 – Public Side)
-const Job = require('../models/Job');   // Model provided by System Architect
+// controllers/jobController.js  (Role 2 & Role 3)
+const Job = require('../models/Job');
 
-// GET /jobs
-// Supports query params: ?department=Engineering&location=Bangalore
-const getAllJobs = async (req, res) => {
+// ─── PUBLIC ROUTES (Role 2) ──────────────────────────────────────────────────
+
+// GET /api/jobs
+exports.getAllJobs = async (req, res) => {
   try {
     const filter = { isActive: true };
 
@@ -18,8 +19,8 @@ const getAllJobs = async (req, res) => {
   }
 };
 
-// GET /jobs/:id
-const getJobById = async (req, res) => {
+// GET /api/jobs/:id
+exports.getJobById = async (req, res) => {
   try {
     const job = await Job.findOne({ _id: req.params.id, isActive: true });
     if (!job) return res.status(404).json({ message: 'Job not found or no longer active.' });
@@ -32,10 +33,10 @@ const getJobById = async (req, res) => {
   }
 };
 
-module.exports = { getAllJobs, getJobById };
+// ─── ADMIN ROUTES (Role 1/3 - Protected) ──────────────────────────────────────
 
-// Add this temporary function to create a job
-const createJob = async (req, res) => {
+// POST /api/admin/jobs/create
+exports.createJob = async (req, res) => {
   try {
     const job = new Job(req.body);
     await job.save();
@@ -45,5 +46,32 @@ const createJob = async (req, res) => {
   }
 };
 
-// Update your exports to include createJob
-module.exports = { getAllJobs, getJobById, createJob };
+// PUT /api/admin/jobs/:id (Unblocks Sampreeth)
+exports.updateJob = async (req, res) => {
+  try {
+    const job = await Job.findByIdAndUpdate(
+      req.params.id, 
+      req.body, 
+      { new: true, runValidators: true } // returns the updated doc & validates
+    );
+    
+    if (!job) return res.status(404).json({ message: "Job not found" });
+    res.status(200).json(job);
+  } catch (err) {
+    console.error('updateJob error:', err.message);
+    res.status(500).json({ message: 'Server error while updating job.' });
+  }
+};
+
+// DELETE /api/admin/jobs/:id (Unblocks Sampreeth)
+exports.deleteJob = async (req, res) => {
+  try {
+    const job = await Job.findByIdAndDelete(req.params.id);
+    if (!job) return res.status(404).json({ message: "Job not found" });
+    
+    res.status(200).json({ message: "Job deleted successfully" });
+  } catch (err) {
+    console.error('deleteJob error:', err.message);
+    res.status(500).json({ message: 'Server error while deleting job.' });
+  }
+};
