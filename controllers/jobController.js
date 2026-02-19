@@ -1,5 +1,5 @@
 // controllers/jobController.js  (Role 2 – Public Side)
-const Job = require('../jobs/Job');   // Model provided by System Architect
+const Job = require('../models/Job');   // Model provided by System Architect
 
 // GET /jobs
 // Supports query params: ?department=Engineering&location=Bangalore

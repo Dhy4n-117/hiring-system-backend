@@ -1,6 +1,6 @@
 // controllers/applicationController.js  (Role 2 – Public Side)
-const Application = require('../applications/Application');  // Model by System Architect
-const Job         = require('../jobs/Job');
+const Application = require('../models/Application');
+const Job         = require('../models/Job');
 const nodemailer  = require('nodemailer');
 
 // ─── Email helper ──────────────────────────────────────────────────────────────

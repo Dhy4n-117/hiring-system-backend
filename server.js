@@ -21,4 +21,11 @@ app.use(express.json()); // Allows us to parse JSON in request bodies
 
 const PORT = process.env.PORT || 5000;
 
+// 3. Define Routes
+const jobRoutes = require('./routes/jobs');
+app.use('/api/jobs', jobRoutes);
+
+const applicationRoutes = require('./routes/applications');
+app.use('/api/applications', applicationRoutes);
+
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
