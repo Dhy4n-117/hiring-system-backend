@@ -1,2 +1,4 @@
-.env
+# Local uploads and private data
 node_modules/
+.env
+uploads/

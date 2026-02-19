@@ -88,7 +88,7 @@ const submitApplication = async (req, res) => {
       phone:          phone.trim(),
       resumeUrl:      req.file.path,               // local path; swap for cloud URL if using S3/Cloudinary
       coverLetter:    coverLetter?.trim() || '',
-      portfolioLinks: parsedLinks,
+      portfolioLinks: req.body.portfolioLinks || "",
       status:         'Applied',
       appliedAt:      new Date()
     });

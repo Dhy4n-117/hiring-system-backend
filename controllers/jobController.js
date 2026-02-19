@@ -33,3 +33,17 @@ const getJobById = async (req, res) => {
 };
 
 module.exports = { getAllJobs, getJobById };
+
+// Add this temporary function to create a job
+const createJob = async (req, res) => {
+  try {
+    const job = new Job(req.body);
+    await job.save();
+    res.status(201).json(job);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+// Update your exports to include createJob
+module.exports = { getAllJobs, getJobById, createJob };
