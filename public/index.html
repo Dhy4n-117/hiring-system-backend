@@ -277,7 +277,7 @@
 </div>
 
 <script>
-  const API_BASE = 'http://localhost:5000';
+  const API_BASE = 'http://localhost:5000/api';
   let allJobs = [];
   let selectedJobId = null;
 
@@ -443,7 +443,7 @@
     formData.append('portfolioLinks', JSON.stringify({ linkedin, github }));
 
     try {
-      const res = await fetch(`${API_BASE}/applications/apply`, {
+      const res = await fetch(`${API_BASE}/applications/submit`, {
         method: 'POST',
         body: formData
       });

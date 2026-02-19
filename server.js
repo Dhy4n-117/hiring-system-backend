@@ -12,6 +12,10 @@ connectDB();
 app.use(cors());
 app.use(express.json()); // Allows us to parse JSON in request bodies
 
+// server.js
+app.use(express.static('public'));
+const path = require('path');
+
 // 3. Define Routes (We will fill these files in Day 2)
 // For now, these lines are commented out so the server doesn't crash
 // app.use('/api/auth', require('./auth/routes'));
@@ -31,3 +35,11 @@ app.use('/api/applications', applicationRoutes);
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 
 app.use('/api/admin', require('./routes/admin'));
+
+
+// ... other middleware
+app.use(express.json());
+
+// Add this line to serve Lavanya's public folder
+app.use(express.static(path.join(__dirname, 'public'))); 
+
