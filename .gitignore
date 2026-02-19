@@ -1,2 +1,9 @@
+<<<<<<< HEAD
 .env
 node_modules/
+=======
+# Local uploads and private data
+node_modules/
+.env
+uploads/
+>>>>>>> 826601a2bf445dfa02ec4ef5905ad47b38749bab

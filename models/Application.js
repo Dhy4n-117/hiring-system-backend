@@ -9,6 +9,7 @@ const ApplicationSchema = new mongoose.Schema({
   coverLetter: { type: String },                // [cite: 97]
   portfolioLinks: { type: String },             // [cite: 98]
   status: {                                     // [cite: 99]
+<<<<<<< HEAD
     type: String,
     enum: ['Applied', 'Shortlisted', 'Interview Scheduled', 'Interviewed', 'Offer Sent', 'Hired', 'Rejected'], // [cite: 31-38]
     default: 'Applied'
@@ -16,6 +17,13 @@ const ApplicationSchema = new mongoose.Schema({
   interviewDate: { type: Date },
   notes: { type: String },
   appliedAt: { type: Date, default: Date.now }
+=======
+    type: String, 
+    enum: ['Applied', 'Shortlisted', 'Interview Scheduled', 'Interviewed', 'Offer Sent', 'Hired', 'Rejected'], // [cite: 31-38]
+    default: 'Applied' 
+  },
+  appliedAt: { type: Date, default: Date.now }  // [cite: 100]
+>>>>>>> 826601a2bf445dfa02ec4ef5905ad47b38749bab
 });
 
 module.exports = mongoose.model('Application', ApplicationSchema);

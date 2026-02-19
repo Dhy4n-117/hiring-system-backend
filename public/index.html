@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Job Openings – Adversity Solutions</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6fb; color: #222; }
+
+    header {
+      background: #1a237e;
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 { font-size: 1.4rem; letter-spacing: 1px; }
+
+    .hero {
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+      color: white;
+      text-align: center;
+      padding: 60px 20px 40px;
+    }
+    .hero h2 { font-size: 2rem; margin-bottom: 10px; }
+    .hero p { opacity: 0.85; font-size: 1rem; }
+
+    .filters {
+      max-width: 900px;
+      margin: 30px auto 0;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 0 20px;
+    }
+    .filters input, .filters select {
+      flex: 1;
+      min-width: 180px;
+      padding: 10px 14px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    .filters button {
+      padding: 10px 22px;
+      background: #1a237e;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .filters button:hover { background: #283593; }
+
+    .job-list {
+      max-width: 900px;
+      margin: 30px auto 60px;
+      padding: 0 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .job-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+    }
+    .job-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+
+    .job-card h3 { font-size: 1.1rem; color: #1a237e; margin-bottom: 6px; }
+    .job-meta { font-size: 0.85rem; color: #666; display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+    .job-meta span { display: flex; align-items: center; gap: 4px; }
+    .job-desc { font-size: 0.9rem; color: #444; line-height: 1.5; margin-bottom: 16px; }
+    .badge {
+      display: inline-block;
+      background: #e8eaf6;
+      color: #1a237e;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .btn-apply {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 9px 22px;
+      background: #1a237e;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-apply:hover { background: #283593; }
+
+    #loading { text-align: center; padding: 40px; color: #666; font-size: 1rem; }
+    #no-results { text-align: center; padding: 40px; color: #888; display: none; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 60px;
+      overflow-y: auto;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 20px 60px;
+      padding: 32px;
+      position: relative;
+    }
+    .modal h2 { color: #1a237e; margin-bottom: 6px; }
+    .modal-meta { font-size: 0.85rem; color: #666; margin-bottom: 16px; display: flex; gap: 14px; flex-wrap: wrap; }
+    .modal-desc { font-size: 0.93rem; line-height: 1.6; color: #333; margin-bottom: 20px; white-space: pre-wrap; }
+    .modal-reqs h4 { margin-bottom: 8px; color: #333; }
+    .modal-reqs ul { padding-left: 20px; font-size: 0.9rem; color: #444; line-height: 1.8; }
+    .modal-close {
+      position: absolute; top: 16px; right: 18px;
+      background: none; border: none; font-size: 1.5rem;
+      cursor: pointer; color: #888;
+    }
+
+    /* Apply Form Modal */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 5px; color: #333; }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 0.92rem;
+    }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none; border-color: #1a237e;
+      box-shadow: 0 0 0 2px rgba(26,35,126,0.12);
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: #1a237e;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+    .btn-submit:hover { background: #283593; }
+    .btn-submit:disabled { background: #9fa8da; cursor: not-allowed; }
+
+    .success-msg {
+      background: #e8f5e9; color: #2e7d32;
+      border: 1px solid #a5d6a7;
+      border-radius: 8px; padding: 14px;
+      text-align: center; font-size: 0.95rem;
+      margin-top: 10px; display: none;
+    }
+    .error-msg {
+      background: #ffebee; color: #c62828;
+      border: 1px solid #ef9a9a;
+      border-radius: 8px; padding: 10px;
+      font-size: 0.88rem; margin-top: 6px; display: none;
+    }
+
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      header h1 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🏢 Adversity Solutions</h1>
+  <span style="font-size:0.85rem; opacity:0.8;">Careers Portal</span>
+</header>
+
+<div class="hero">
+  <h2>Join Our Team</h2>
+  <p>Explore open positions and start your journey with us</p>
+</div>
+
+<div class="filters">
+  <input type="text" id="search" placeholder="🔍 Search by title..." oninput="applyFilters()" />
+  <select id="filterDept" onchange="applyFilters()">
+    <option value="">All Departments</option>
+  </select>
+  <select id="filterLoc" onchange="applyFilters()">
+    <option value="">All Locations</option>
+  </select>
+</div>
+
+<div class="job-list" id="jobList">
+  <div id="loading">Loading jobs...</div>
+  <div id="no-results">No jobs found matching your filters.</div>
+</div>
+
+<!-- Job Detail Modal -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
+    <h2 id="d-title"></h2>
+    <div class="modal-meta" id="d-meta"></div>
+    <p class="modal-desc" id="d-desc"></p>
+    <div class="modal-reqs" id="d-reqs"></div>
+    <button class="btn-apply" id="d-apply-btn" onclick="openApplyForm()">Apply Now →</button>
+  </div>
+</div>
+
+<!-- Apply Form Modal -->
+<div class="modal-overlay" id="applyModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('applyModal')">✕</button>
+    <h2 style="margin-bottom:4px;">Apply for <span id="apply-job-title" style="color:#1a237e;"></span></h2>
+    <p style="font-size:0.85rem;color:#777;margin-bottom:20px;">All fields marked * are required</p>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="f-name" placeholder="Your full name" />
+      </div>
+      <div class="form-group">
+        <label>Email *</label>
+        <input type="email" id="f-email" placeholder="you@email.com" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Phone Number *</label>
+      <input type="tel" id="f-phone" placeholder="+91 XXXXX XXXXX" />
+    </div>
+
+    <div class="form-group">
+      <label>Resume (PDF/DOC) *</label>
+      <input type="file" id="f-resume" accept=".pdf,.doc,.docx" />
+    </div>
+
+    <div class="form-group">
+      <label>Cover Letter</label>
+      <textarea id="f-cover" placeholder="Tell us why you'd be a great fit..."></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>LinkedIn Profile</label>
+        <input type="url" id="f-linkedin" placeholder="https://linkedin.com/in/..." />
+      </div>
+      <div class="form-group">
+        <label>GitHub Profile</label>
+        <input type="url" id="f-github" placeholder="https://github.com/..." />
+      </div>
+    </div>
+
+    <div class="error-msg" id="form-error"></div>
+    <button class="btn-submit" id="submit-btn" onclick="submitApplication()">Submit Application</button>
+    <div class="success-msg" id="form-success">
+      ✅ Application submitted! Check your email for a confirmation.
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'http://localhost:5000';
+  let allJobs = [];
+  let selectedJobId = null;
+
+  // ─── Fetch all jobs on load ───────────────────────────────────────────────
+  async function loadJobs() {
+    try {
+      const res = await fetch(`${API_BASE}/jobs`);
+      const data = await res.json();
+      allJobs = data;
+      populateFilters(data);
+      renderJobs(data);
+    } catch (err) {
+      document.getElementById('loading').textContent = '⚠️ Could not load jobs. Please try again later.';
+    }
+  }
+
+  // ─── Populate filter dropdowns dynamically ────────────────────────────────
+  function populateFilters(jobs) {
+    const depts = [...new Set(jobs.map(j => j.department).filter(Boolean))];
+    const locs  = [...new Set(jobs.map(j => j.location).filter(Boolean))];
+    const deptSel = document.getElementById('filterDept');
+    const locSel  = document.getElementById('filterLoc');
+
+    depts.forEach(d => {
+      const o = document.createElement('option');
+      o.value = d; o.textContent = d;
+      deptSel.appendChild(o);
+    });
+    locs.forEach(l => {
+      const o = document.createElement('option');
+      o.value = l; o.textContent = l;
+      locSel.appendChild(o);
+    });
+  }
+
+  // ─── Filter logic ─────────────────────────────────────────────────────────
+  function applyFilters() {
+    const search = document.getElementById('search').value.toLowerCase();
+    const dept   = document.getElementById('filterDept').value;
+    const loc    = document.getElementById('filterLoc').value;
+
+    const filtered = allJobs.filter(j => {
+      const matchSearch = !search || j.title.toLowerCase().includes(search)
+                          || (j.description && j.description.toLowerCase().includes(search));
+      const matchDept   = !dept || j.department === dept;
+      const matchLoc    = !loc  || j.location === loc;
+      return matchSearch && matchDept && matchLoc && j.isActive !== false;
+    });
+    renderJobs(filtered);
+  }
+
+  // ─── Render job cards ─────────────────────────────────────────────────────
+  function renderJobs(jobs) {
+    const list = document.getElementById('jobList');
+    const noRes = document.getElementById('no-results');
+    document.getElementById('loading').style.display = 'none';
+
+    const existingCards = list.querySelectorAll('.job-card');
+    existingCards.forEach(c => c.remove());
+
+    if (!jobs.length) {
+      noRes.style.display = 'block';
+      return;
+    }
+    noRes.style.display = 'none';
+
+    jobs.forEach(job => {
+      const card = document.createElement('div');
+      card.className = 'job-card';
+      card.innerHTML = `
+        <h3>${job.title}</h3>
+        <div class="job-meta">
+          <span>🏢 ${job.department || 'N/A'}</span>
+          <span>📍 ${job.location || 'Remote'}</span>
+          <span>💼 ${job.employmentType || 'Full-time'}</span>
+        </div>
+        <p class="job-desc">${(job.description || '').slice(0, 160)}${job.description && job.description.length > 160 ? '...' : ''}</p>
+        <span class="badge">${job.department}</span>
+        <span class="badge">${job.employmentType || 'Full-time'}</span>
+        <br/>
+        <button class="btn-apply" onclick="openDetail('${job._id}')">View & Apply →</button>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  // ─── Open job detail modal ─────────────────────────────────────────────────
+  async function openDetail(jobId) {
+    try {
+      const res = await fetch(`${API_BASE}/jobs/${jobId}`);
+      const job = await res.json();
+      selectedJobId = job._id;
+
+      document.getElementById('d-title').textContent = job.title;
+      document.getElementById('d-meta').innerHTML = `
+        <span>🏢 ${job.department}</span>
+        <span>📍 ${job.location}</span>
+        <span>💼 ${job.employmentType || 'Full-time'}</span>
+        <span>📅 Posted: ${new Date(job.createdAt).toLocaleDateString()}</span>
+      `;
+      document.getElementById('d-desc').textContent = job.description || '';
+      document.getElementById('d-reqs').innerHTML = job.requirements
+        ? `<h4>Requirements</h4><ul>${job.requirements.split('\n').filter(Boolean).map(r => `<li>${r}</li>`).join('')}</ul>`
+        : '';
+
+      openModal('detailModal');
+    } catch (err) {
+      alert('Could not load job details. Please try again.');
+    }
+  }
+
+  // ─── Open apply form ───────────────────────────────────────────────────────
+  function openApplyForm() {
+    const title = document.getElementById('d-title').textContent;
+    document.getElementById('apply-job-title').textContent = title;
+    // Reset form
+    ['f-name','f-email','f-phone','f-cover','f-linkedin','f-github'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('f-resume').value = '';
+    document.getElementById('form-error').style.display = 'none';
+    document.getElementById('form-success').style.display = 'none';
+    document.getElementById('submit-btn').disabled = false;
+    closeModal('detailModal');
+    openModal('applyModal');
+  }
+
+  // ─── Submit application ────────────────────────────────────────────────────
+  async function submitApplication() {
+    const name     = document.getElementById('f-name').value.trim();
+    const email    = document.getElementById('f-email').value.trim();
+    const phone    = document.getElementById('f-phone').value.trim();
+    const resume   = document.getElementById('f-resume').files[0];
+    const cover    = document.getElementById('f-cover').value.trim();
+    const linkedin = document.getElementById('f-linkedin').value.trim();
+    const github   = document.getElementById('f-github').value.trim();
+
+    const errEl = document.getElementById('form-error');
+    errEl.style.display = 'none';
+
+    if (!name || !email || !phone || !resume) {
+      errEl.textContent = '⚠️ Please fill in all required fields and upload your resume.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errEl.textContent = '⚠️ Please enter a valid email address.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    const formData = new FormData();
+    formData.append('jobId', selectedJobId);
+    formData.append('name', name);
+    formData.append('email', email);
+    formData.append('phone', phone);
+    formData.append('resume', resume);
+    formData.append('coverLetter', cover);
+    formData.append('portfolioLinks', JSON.stringify({ linkedin, github }));
+
+    try {
+      const res = await fetch(`${API_BASE}/applications/apply`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        document.getElementById('form-success').style.display = 'block';
+        btn.style.display = 'none';
+      } else {
+        errEl.textContent = data.message || 'Submission failed. Please try again.';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Submit Application';
+      }
+    } catch (err) {
+      errEl.textContent = '⚠️ Network error. Please check your connection and try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Submit Application';
+    }
+  }
+
+  // ─── Modal helpers ─────────────────────────────────────────────────────────
+  function openModal(id)  { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
+
+  loadJobs();
+</script>
+</body>
+  </html>
