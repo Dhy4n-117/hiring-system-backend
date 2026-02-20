@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard — Adversity Solutions</title>
+    <meta name="description" content="HR Admin Dashboard for managing jobs and applications." />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <div class="admin-layout">
+
+        <!-- ══════════════════════════════════════
+       SIDEBAR
+  ═══════════════════════════════════════ -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo">
+                    <div class="brand-icon">🏢</div>
+                    <div class="brand-text">
+                        <strong>Admin Portal</strong>
+                        <span>Adversity Solutions</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Main</div>
+                <div class="nav-item active" id="nav-overview" onclick="showView('overview')">
+                    <span class="nav-icon">📊</span> Overview
+                </div>
+                <div class="nav-item" id="nav-jobs" onclick="showView('jobs')">
+                    <span class="nav-icon">💼</span> Jobs
+                </div>
+                <div class="nav-item" id="nav-create-job" onclick="showView('create-job')">
+                    <span class="nav-icon">➕</span> Post a Job
+                </div>
+
+                <div class="nav-section-label">Recruitment</div>
+                <div class="nav-item" id="nav-applications" onclick="showView('applications')">
+                    <span class="nav-icon">📋</span> Applications
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn btn-danger btn-sm" id="logoutBtn" onclick="handleLogout()" style="width:100%;">
+                    🚪 Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- ══════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════ -->
+        <div class="main-content">
+
+            <!-- Top Bar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h2 id="topbarTitle">Dashboard Overview</h2>
+                    <p id="topbarSub">Welcome back, Admin</p>
+                </div>
+                <div class="topbar-right">
+                    <div class="admin-badge">
+                        <div class="avatar">A</div>
+                        <span>Administrator</span>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="handleLogout()">Sign Out</button>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="page-content">
+
+                <!-- ────────────────────────────────
+           VIEW: Overview / Stats
+      ──────────────────────────────── -->
+                <section class="view-section active" id="view-overview">
+                    <div class="section-header">
+                        <div>
+                            <h2>Dashboard Overview</h2>
+                            <p>Real-time hiring pipeline statistics</p>
+                        </div>
+                        <button class="btn btn-accent btn-sm" onclick="loadStats()">↻ Refresh</button>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="stats-grid" id="statsGrid">
+                        <div class="loading-state">
+                            <div class="spinner"></div><span>Loading stats…</span>
+                        </div>
+                    </div>
+
+                    <!-- Recent Jobs Preview -->
+                    <div class="card" style="margin-top: 8px;">
+                        <div class="card-header">
+                            <h3>Recent Job Postings</h3>
+                            <button class="btn btn-accent btn-sm" onclick="showView('jobs')">View All →</button>
+                        </div>
+                        <div class="card-body" style="padding:0;">
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Department</th>
+                                            <th>Location</th>
+                                            <th>Status</th>
+                                            <th>Posted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentJobsBody">
+                                        <tr>
+                                            <td colspan="5"
+                                                style="text-align:center;padding:28px;color:var(--text-muted);">Loading…
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ────────────────────────────────
+           VIEW: All Jobs
+      ──────────────────────────────── -->
+                <section class="view-section" id="view-jobs">
+                    <div class="section-header">
+                        <div>
+                            <h2>Job Postings</h2>
+                            <p>Manage all open and closed positions</p>
+                        </div>
+                        <div style="display:flex;gap:10px;">
+                            <button class="btn btn-accent btn-sm" onclick="loadJobs()">↻ Refresh</button>
+                            <button class="btn btn-primary btn-sm" onclick="showView('create-job')">+ Post Job</button>
+                        </div>
+                    </div>
+
+                    <div id="jobsAlert" class="alert" style="margin-bottom:16px;"></div>
+
+                    <div class="card">
+                        <div class="card-body" style="padding:0;">
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Dept / Location</th>
+                                            <th>Type</th>
+                                            <th>Salary</th>
+                                            <th>Status</th>
+                                            <th>Posted</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="jobsTableBody">
+                                        <tr>
+                                            <td colspan="7">
+                                                <div class="loading-state">
+                                                    <div class="spinner"></div><span>Loading jobs…</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ────────────────────────────────
+           VIEW: Create Job
+      ──────────────────────────────── -->
+                <section class="view-section" id="view-create-job">
+                    <div class="section-header">
+                        <div>
+                            <h2>Post a New Job</h2>
+                            <p>Fill in the details to create a job opening</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Job Details</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="createJobForm" onsubmit="handleCreateJob(event)" novalidate>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="jTitle">Job Title *</label>
+                                        <input type="text" id="jTitle" placeholder="e.g. Senior Frontend Developer"
+                                            required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="jDept">Department *</label>
+                                        <input type="text" id="jDept" placeholder="e.g. Engineering" required />
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="jLocation">Location *</label>
+                                        <input type="text" id="jLocation" placeholder="e.g. Bangalore / Remote"
+                                            required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="jEmploymentType">Employment Type *</label>
+                                        <select id="jEmploymentType" required>
+                                            <option value="">Select type…</option>
+                                            <option value="Full-time">Full-time</option>
+                                            <option value="Part-time">Part-time</option>
+                                            <option value="Contract">Contract</option>
+                                            <option value="Internship">Internship</option>
+                                            <option value="Freelance">Freelance</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="jSalary">Salary / CTC (optional)</label>
+                                    <input type="text" id="jSalary" placeholder="e.g. ₹8–12 LPA or $60,000–$80,000" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="jDescription">Job Description *</label>
+                                    <textarea id="jDescription" rows="4"
+                                        placeholder="Describe the role, responsibilities, team, and what we are looking for…"
+                                        required></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="jRequirements">Requirements *</label>
+                                    <textarea id="jRequirements" rows="4"
+                                        placeholder="List required skills, qualifications, and experience (one per line)…"
+                                        required></textarea>
+                                </div>
+
+                                <div id="createJobAlert" class="alert" style="margin-bottom:14px;"></div>
+
+                                <div style="display:flex;gap:12px;">
+                                    <button type="submit" class="btn btn-primary" id="createJobBtn" style="flex:1;">
+                                        <span id="createBtnLabel">🚀 Post Job</span>
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="resetCreateForm()"
+                                        style="flex:0 0 auto;">
+                                        Clear
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ────────────────────────────────
+           VIEW: Applications
+      ──────────────────────────────── -->
+                <section class="view-section" id="view-applications">
+                    <div class="section-header">
+                        <div>
+                            <h2>Applications</h2>
+                            <p>Review and manage all candidate applications</p>
+                        </div>
+                        <button class="btn btn-accent btn-sm" onclick="loadApplications()">↻ Refresh</button>
+                    </div>
+
+                    <!-- Filters -->
+                    <div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
+                        <select id="filterStatus" class="status-select" onchange="loadApplications()"
+                            style="padding:10px 14px;font-size:0.88rem;">
+                            <option value="">All Statuses</option>
+                            <option value="Applied">Applied</option>
+                            <option value="Reviewed">Reviewed</option>
+                            <option value="Interview">Interview</option>
+                            <option value="Hired">Hired</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+
+                    <div id="appsAlert" class="alert" style="margin-bottom:16px;"></div>
+
+                    <div class="card">
+                        <div class="card-body" style="padding:0;">
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Candidate</th>
+                                            <th>Email</th>
+                                            <th>Job Applied</th>
+                                            <th>Current Status</th>
+                                            <th>Applied On</th>
+                                            <th>Update Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="appsTableBody">
+                                        <tr>
+                                            <td colspan="6">
+                                                <div class="loading-state">
+                                                    <div class="spinner"></div><span>Loading applications…</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </main><!-- /page-content -->
+        </div><!-- /main-content -->
+    </div><!-- /admin-layout -->
+
+
+    <!-- ══════════════════════════════════════
+     MODAL: Edit Job
+═══════════════════════════════════════ -->
+    <div class="modal-overlay" id="editJobModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Edit Job Posting</h3>
+                <button class="modal-close" onclick="closeModal('editJobModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="editJobForm" novalidate>
+                    <input type="hidden" id="editJobId" />
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="eTitle">Title *</label>
+                            <input type="text" id="eTitle" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="eDept">Department *</label>
+                            <input type="text" id="eDept" required />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="eLocation">Location *</label>
+                            <input type="text" id="eLocation" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="eType">Employment Type</label>
+                            <select id="eType">
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Internship">Internship</option>
+                                <option value="Freelance">Freelance</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="eSalary">Salary</label>
+                        <input type="text" id="eSalary" />
+                    </div>
+                    <div class="form-group">
+                        <label for="eDescription">Description *</label>
+                        <textarea id="eDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="eRequirements">Requirements *</label>
+                        <textarea id="eRequirements" rows="3" required></textarea>
+                    </div>
+                    <div id="editJobAlert" class="alert" style="margin-bottom:10px;"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('editJobModal')">Cancel</button>
+                <button class="btn btn-primary" id="saveEditBtn" onclick="handleEditJob()">
+                    <span id="saveEditLabel">💾 Save Changes</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════
+     MODAL: Confirm Delete
+═══════════════════════════════════════ -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal" style="max-width:420px;">
+            <div class="modal-header">
+                <h3>Delete Job Posting</h3>
+                <button class="modal-close" onclick="closeModal('deleteModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="color:var(--text-secondary);font-size:0.93rem;">
+                    Are you sure you want to permanently delete <strong id="deleteJobTitle"
+                        style="color:var(--danger);"></strong>?
+                    This action cannot be undone.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancel</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">🗑 Delete</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════ -->
+    <script src="admin.js"></script>
+    <script>
+        // ─── Security Guard ─────────────────────────
+        requireAuth(); // Redirect to login.html if no token
+
+        // ─── State ──────────────────────────────────
+        let jobToDelete = null; // store id for delete confirmation
+
+        // ─── Navigation ─────────────────────────────
+        const VIEWS = {
+            'overview': { title: 'Dashboard Overview', sub: 'Real-time pipeline stats' },
+            'jobs': { title: 'Job Postings', sub: 'Manage all positions' },
+            'create-job': { title: 'Post a New Job', sub: 'Create a job opening' },
+            'applications': { title: 'Applications', sub: 'Review candidate applications' },
+        };
+
+        function showView(viewKey) {
+            // Hide all sections
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            // Show target
+            document.getElementById(`view-${viewKey}`).classList.add('active');
+            document.getElementById(`nav-${viewKey}`)?.classList.add('active');
+
+            // Update topbar
+            const meta = VIEWS[viewKey] || {};
+            document.getElementById('topbarTitle').textContent = meta.title || '';
+            document.getElementById('topbarSub').textContent = meta.sub || '';
+
+            // Load data for each view
+            if (viewKey === 'overview') { loadStats(); loadRecentJobs(); }
+            if (viewKey === 'jobs') { loadJobs(); }
+            if (viewKey === 'applications') { loadApplications(); }
+        }
+
+        // ─── Logout ─────────────────────────────────
+        function handleLogout() {
+            logout(); // clears token + redirects (from admin.js)
+        }
+
+        // ─── Modal helpers ───────────────────────────
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        // Close on backdrop click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', e => {
+                if (e.target === overlay) overlay.classList.remove('open');
+            });
+        });
+
+        // ─── Alert helper ────────────────────────────
+        function showAlert(elId, message, type = 'error') {
+            const el = document.getElementById(elId);
+            el.textContent = message;
+            el.className = `alert alert-${type} show`;
+        }
+        function hideAlert(elId) {
+            const el = document.getElementById(elId);
+            el.className = 'alert';
+        }
+
+        // ════════════════════════════════════════════
+        // STATS — Dashboard Overview
+        // ════════════════════════════════════════════
+        async function loadStats() {
+            const grid = document.getElementById('statsGrid');
+            grid.innerHTML = `<div class="loading-state"><div class="spinner"></div><span>Loading stats…</span></div>`;
+
+            try {
+                const stats = await fetchStats();
+
+                // stats shape can vary by backend; we handle both flat and nested
+                const totalJobs = stats.totalJobs ?? stats.jobs ?? '—';
+                const openJobs = stats.openJobs ?? stats.open ?? '—';
+                const closedJobs = stats.closedJobs ?? stats.closed ?? '—';
+                const totalApps = stats.totalApplications ?? stats.applications ?? '—';
+                const newApps = stats.newApplications ?? stats.pending ?? '—';
+
+                grid.innerHTML = `
+      <div class="stat-card accent">
+        <div class="stat-icon">💼</div>
+        <div class="stat-value">${totalJobs}</div>
+        <div class="stat-label">Total Jobs</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-icon">🟢</div>
+        <div class="stat-value">${openJobs}</div>
+        <div class="stat-label">Open Positions</div>
+      </div>
+      <div class="stat-card danger">
+        <div class="stat-icon">🔴</div>
+        <div class="stat-value">${closedJobs}</div>
+        <div class="stat-label">Closed Positions</div>
+      </div>
+      <div class="stat-card info">
+        <div class="stat-icon">📋</div>
+        <div class="stat-value">${totalApps}</div>
+        <div class="stat-label">Total Applications</div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-icon">🆕</div>
+        <div class="stat-value">${newApps}</div>
+        <div class="stat-label">New / Pending</div>
+      </div>
+    `;
+            } catch (err) {
+                grid.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${err.message}</p></div>`;
+            }
+        }
+
+        // ─── Recent Jobs (for Overview) ──────────────
+        async function loadRecentJobs() {
+            const tbody = document.getElementById('recentJobsBody');
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:28px;color:var(--text-muted);">Loading…</td></tr>`;
+            try {
+                const jobs = await fetchJobs();
+                const recent = jobs.slice(0, 5); // Show latest 5
+                if (!recent.length) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:28px;color:var(--text-muted);">No jobs found.</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = recent.map(job => `
+      <tr>
+        <td><span class="job-title">${esc(job.title)}</span></td>
+        <td>${esc(job.department || '—')}</td>
+        <td>${esc(job.location || '—')}</td>
+        <td>${statusBadge(job.status)}</td>
+        <td style="color:var(--text-muted);font-size:0.82rem;">${formatDate(job.createdAt)}</td>
+      </tr>
+    `).join('');
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--danger);padding:20px;">${err.message}</td></tr>`;
+            }
+        }
+
+        // ════════════════════════════════════════════
+        // JOBS — Full Table
+        // ════════════════════════════════════════════
+        async function loadJobs() {
+            const tbody = document.getElementById('jobsTableBody');
+            tbody.innerHTML = `<tr><td colspan="7"><div class="loading-state"><div class="spinner"></div><span>Loading…</span></div></td></tr>`;
+            hideAlert('jobsAlert');
+
+            try {
+                const jobs = await fetchJobs();
+
+                if (!jobs.length) {
+                    tbody.innerHTML = `
+        <tr><td colspan="7">
+          <div class="empty-state">
+            <div class="empty-icon">💼</div>
+            <p>No jobs found. <button class="btn btn-accent btn-sm" onclick="showView('create-job')" style="margin-top:10px;">Post your first job →</button></p>
+          </div>
+        </td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = jobs.map(job => `
+      <tr id="job-row-${job._id}">
+        <td><span class="job-title">${esc(job.title)}</span><br/><small style="color:var(--text-muted);">${esc(job.department || '')}</small></td>
+        <td>${esc(job.location || '—')}</td>
+        <td style="color:var(--text-secondary);font-size:0.83rem;">${esc(job.employmentType || '—')}</td>
+        <td style="color:var(--text-secondary);font-size:0.83rem;">${esc(job.salary || '—')}</td>
+        <td>${statusBadge(job.status)}</td>
+        <td style="color:var(--text-muted);font-size:0.82rem;">${formatDate(job.createdAt)}</td>
+        <td>
+          <div class="td-actions">
+            <!-- Status Toggle -->
+            <select class="status-select" onchange="handleStatusChange('${job._id}', this.value, this)" title="Change status">
+              <option value="open"   ${job.status === 'open' ? 'selected' : ''}>Open</option>
+              <option value="closed" ${job.status === 'closed' ? 'selected' : ''}>Closed</option>
+            </select>
+            <!-- Edit -->
+            <button class="btn btn-accent btn-sm" onclick="openEditModal('${job._id}')" title="Edit job">✏️</button>
+            <!-- Delete -->
+            <button class="btn btn-danger btn-sm" onclick="openDeleteModal('${job._id}', '${esc(job.title)}')" title="Delete job">🗑</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+
+            } catch (err) {
+                showAlert('jobsAlert', '❌ ' + err.message, 'error');
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:28px;">Failed to load jobs.</td></tr>`;
+            }
+        }
+
+        // ─── Task 7: Update Job Status ───────────────
+        async function handleStatusChange(id, newStatus, selectEl) {
+            const originalValue = newStatus === 'open' ? 'closed' : 'open';
+            try {
+                await updateJobStatus(id, newStatus);
+                // Update badge in same row
+                const row = document.getElementById(`job-row-${id}`);
+                if (row) {
+                    const badges = row.querySelectorAll('.badge');
+                    badges.forEach(b => { b.outerHTML = statusBadge(newStatus); });
+                }
+            } catch (err) {
+                alert('Failed to update status: ' + err.message);
+                selectEl.value = originalValue; // revert
+            }
+        }
+
+        // ─── Task 6: Delete Job ──────────────────────
+        function openDeleteModal(id, title) {
+            jobToDelete = id;
+            document.getElementById('deleteJobTitle').textContent = title;
+            openModal('deleteModal');
+        }
+
+        async function confirmDelete() {
+            if (!jobToDelete) return;
+            const btn = document.getElementById('confirmDeleteBtn');
+            btn.textContent = 'Deleting…';
+            btn.disabled = true;
+
+            try {
+                await deleteJob(jobToDelete);
+                closeModal('deleteModal');
+                showAlert('jobsAlert', '✅ Job deleted successfully.', 'success');
+                jobToDelete = null;
+                loadJobs(); // Refresh list
+            } catch (err) {
+                alert('Delete failed: ' + err.message);
+            } finally {
+                btn.textContent = '🗑 Delete';
+                btn.disabled = false;
+            }
+        }
+
+        // ─── Edit Job ────────────────────────────────
+        let editingJob = null;
+
+        async function openEditModal(id) {
+            try {
+                const job = await fetchJobById(id);
+                editingJob = job;
+                document.getElementById('editJobId').value = job._id;
+                document.getElementById('eTitle').value = job.title || '';
+                document.getElementById('eDept').value = job.department || '';
+                document.getElementById('eLocation').value = job.location || '';
+                document.getElementById('eType').value = job.employmentType || 'Full-time';
+                document.getElementById('eSalary').value = job.salary || '';
+                document.getElementById('eDescription').value = job.description || '';
+                document.getElementById('eRequirements').value = job.requirements || '';
+                hideAlert('editJobAlert');
+                openModal('editJobModal');
+            } catch (err) {
+                alert('Could not load job details: ' + err.message);
+            }
+        }
+
+        async function handleEditJob() {
+            const id = document.getElementById('editJobId').value;
+            const btn = document.getElementById('saveEditBtn');
+            const lbl = document.getElementById('saveEditLabel');
+            hideAlert('editJobAlert');
+
+            const jobData = {
+                title: document.getElementById('eTitle').value.trim(),
+                department: document.getElementById('eDept').value.trim(),
+                location: document.getElementById('eLocation').value.trim(),
+                employmentType: document.getElementById('eType').value,
+                salary: document.getElementById('eSalary').value.trim(),
+                description: document.getElementById('eDescription').value.trim(),
+                requirements: document.getElementById('eRequirements').value.trim(),
+            };
+
+            if (!jobData.title || !jobData.department || !jobData.location || !jobData.description || !jobData.requirements) {
+                showAlert('editJobAlert', '⚠️ Please fill in all required fields.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            lbl.textContent = 'Saving…';
+
+            try {
+                await updateJob(id, jobData);
+                closeModal('editJobModal');
+                showAlert('jobsAlert', '✅ Job updated successfully.', 'success');
+                loadJobs();
+            } catch (err) {
+                showAlert('editJobAlert', '❌ ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                lbl.textContent = '💾 Save Changes';
+            }
+        }
+
+        // ════════════════════════════════════════════
+        // CREATE JOB — Task 4
+        // ════════════════════════════════════════════
+        async function handleCreateJob(event) {
+            event.preventDefault();
+            hideAlert('createJobAlert');
+
+            const btn = document.getElementById('createJobBtn');
+            const lbl = document.getElementById('createBtnLabel');
+
+            const jobData = {
+                title: document.getElementById('jTitle').value.trim(),
+                department: document.getElementById('jDept').value.trim(),
+                location: document.getElementById('jLocation').value.trim(),
+                employmentType: document.getElementById('jEmploymentType').value,
+                salary: document.getElementById('jSalary').value.trim(),
+                description: document.getElementById('jDescription').value.trim(),
+                requirements: document.getElementById('jRequirements').value.trim(),
+            };
+
+            // Validation
+            if (!jobData.title || !jobData.department || !jobData.location || !jobData.employmentType || !jobData.description || !jobData.requirements) {
+                showAlert('createJobAlert', '⚠️ Please fill in all required fields.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            lbl.textContent = 'Posting…';
+
+            try {
+                await createJob(jobData);
+                showAlert('createJobAlert', '✅ Job posted successfully! It is now visible to candidates.', 'success');
+                resetCreateForm();
+                // Auto navigate to jobs view after short delay
+                setTimeout(() => {
+                    showView('jobs');
+                }, 1500);
+            } catch (err) {
+                showAlert('createJobAlert', '❌ ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                lbl.textContent = '🚀 Post Job';
+            }
+        }
+
+        function resetCreateForm() {
+            document.getElementById('createJobForm').reset();
+            hideAlert('createJobAlert');
+        }
+
+        // ════════════════════════════════════════════
+        // APPLICATIONS — Tasks 8
+        // ════════════════════════════════════════════
+        async function loadApplications() {
+            const tbody = document.getElementById('appsTableBody');
+            tbody.innerHTML = `<tr><td colspan="6"><div class="loading-state"><div class="spinner"></div><span>Loading…</span></div></td></tr>`;
+            hideAlert('appsAlert');
+
+            const status = document.getElementById('filterStatus').value;
+
+            try {
+                const apps = await fetchApplications(status ? { status } : {});
+
+                if (!apps.length) {
+                    tbody.innerHTML = `
+        <tr><td colspan="6">
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <p>No applications found${status ? ` with status "${status}"` : ''}.</p>
+          </div>
+        </td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = apps.map(app => {
+                    const jobTitle = app.jobId?.title || '—';
+                    return `
+        <tr>
+          <td>
+            <span style="font-weight:600;color:var(--text-primary);">${esc(app.name || '—')}</span><br/>
+            <small style="color:var(--text-muted);">${esc(app.phone || '')}</small>
+          </td>
+          <td style="color:var(--text-secondary);font-size:0.86rem;">${esc(app.email || '—')}</td>
+          <td style="color:var(--text-secondary);font-size:0.86rem;">${esc(jobTitle)}</td>
+          <td>${appStatusBadge(app.status)}</td>
+          <td style="color:var(--text-muted);font-size:0.82rem;">${formatDate(app.appliedAt)}</td>
+          <td>
+            <select class="status-select" onchange="handleAppStatusChange('${app._id}', this.value, this)"
+                    title="Update application status">
+              <option value="Applied"   ${app.status === 'Applied' ? 'selected' : ''}>Applied</option>
+              <option value="Reviewed"  ${app.status === 'Reviewed' ? 'selected' : ''}>Reviewed</option>
+              <option value="Interview" ${app.status === 'Interview' ? 'selected' : ''}>Interview</option>
+              <option value="Hired"     ${app.status === 'Hired' ? 'selected' : ''}>Hired</option>
+              <option value="Rejected"  ${app.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+            </select>
+          </td>
+        </tr>
+      `;
+                }).join('');
+
+            } catch (err) {
+                showAlert('appsAlert', '❌ ' + err.message, 'error');
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:28px;">Failed to load applications.</td></tr>`;
+            }
+        }
+
+        async function handleAppStatusChange(id, newStatus, selectEl) {
+            const prev = selectEl.dataset.prev || selectEl.value;
+            try {
+                await updateApplicationStatus(id, newStatus);
+                selectEl.dataset.prev = newStatus;
+                // Refresh row badge
+                const row = selectEl.closest('tr');
+                const badgeTd = row.querySelectorAll('td')[3];
+                if (badgeTd) badgeTd.innerHTML = appStatusBadge(newStatus);
+            } catch (err) {
+                alert('Failed to update application status: ' + err.message);
+                selectEl.value = prev;
+            }
+        }
+
+        // ════════════════════════════════════════════
+        // UTILITY HELPERS
+        // ════════════════════════════════════════════
+
+        /** Escape HTML special chars to prevent XSS */
+        function esc(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        /** Format ISO date string to readable format */
+        function formatDate(isoStr) {
+            if (!isoStr) return '—';
+            return new Date(isoStr).toLocaleDateString('en-IN', {
+                day: '2-digit', month: 'short', year: 'numeric'
+            });
+        }
+
+        /** Render a job status badge */
+        function statusBadge(status) {
+            const s = (status || 'open').toLowerCase();
+            return `<span class="badge badge-${s}">${s === 'open' ? '🟢' : '🔴'} ${capitalize(s)}</span>`;
+        }
+
+        /** Render an application status badge */
+        function appStatusBadge(status) {
+            const s = (status || 'applied').toLowerCase();
+            const classMap = {
+                applied: 'badge-applied',
+                reviewed: 'badge-reviewed',
+                interview: 'badge-reviewed',
+                hired: 'badge-hired',
+                rejected: 'badge-rejected',
+            };
+            const cls = classMap[s] || 'badge-applied';
+            return `<span class="badge ${cls}">${esc(status)}</span>`;
+        }
+
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // ─── Initial Load ────────────────────────────
+        loadStats();
+        loadRecentJobs();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login — Adversity Solutions</title>
+  <meta name="description" content="HR Admin Portal Login for Adversity Solutions Hiring System." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="login-page">
+
+  <div class="login-card">
+    <!-- Brand -->
+    <div class="login-brand">
+      <div class="logo-icon">🏢</div>
+      <h1>Admin Portal</h1>
+      <p>Adversity Solutions · HR Dashboard</p>
+    </div>
+
+    <!-- Login Form -->
+    <form id="loginForm" onsubmit="handleLogin(event)" novalidate>
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="admin@example.com"
+          autocomplete="email"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Enter your password"
+          autocomplete="current-password"
+          required
+        />
+      </div>
+
+      <!-- Messages -->
+      <div id="errorAlert" class="alert alert-error" role="alert"></div>
+      <div id="successAlert" class="alert alert-success" role="alert"></div>
+
+      <button type="submit" class="btn btn-primary" id="loginBtn" style="margin-top: 6px;">
+        <span id="btnLabel">Sign In</span>
+      </button>
+    </form>
+
+    <p style="text-align:center; margin-top:18px; font-size:0.78rem; color:var(--text-muted);">
+      Authorised personnel only · JWT-secured access
+    </p>
+  </div>
+
+  <!-- Load admin.js utility -->
+  <script src="admin.js"></script>
+  <script>
+    // ── If already logged in, skip to dashboard ──
+    (function () {
+      if (getToken()) {
+        window.location.replace('dashboard.html');
+      }
+    })();
+
+    // ── Handle Login Submit ──────────────────────
+    async function handleLogin(event) {
+      event.preventDefault();
+
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn      = document.getElementById('loginBtn');
+      const btnLabel = document.getElementById('btnLabel');
+      const errAlert = document.getElementById('errorAlert');
+      const okAlert  = document.getElementById('successAlert');
+
+      // Reset alerts
+      errAlert.classList.remove('show');
+      okAlert.classList.remove('show');
+
+      // Basic client-side validation
+      if (!email || !password) {
+        showAlert(errAlert, '⚠️ Please enter both email and password.');
+        return;
+      }
+
+      // Loading state
+      btn.disabled   = true;
+      btnLabel.textContent = 'Signing in…';
+
+      try {
+        await loginAdmin(email, password);
+        showAlert(okAlert, '✅ Login successful! Redirecting…');
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 800);
+      } catch (err) {
+        showAlert(errAlert, '❌ ' + (err.message || 'Login failed. Please try again.'));
+        btn.disabled   = false;
+        btnLabel.textContent = 'Sign In';
+      }
+    }
+
+    function showAlert(el, message) {
+      el.textContent = message;
+      el.classList.add('show');
+    }
+  </script>
+</body>
+</html>
