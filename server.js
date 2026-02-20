@@ -1,45 +1,27 @@
 const express = require('express');
 const cors = require('cors');
-const connectDB = require('./config/db'); // Import DB logic
+const path = require('path');
+const connectDB = require('./config/db');
 require('dotenv').config();
 
 const app = express();
 
-// 1. Connect to Database
+// Connect to Database
 connectDB();
 
-// 2. Middleware
+// Middleware
 app.use(cors());
-app.use(express.json()); // Allows us to parse JSON in request bodies
+app.use(express.json());
 
-// server.js
-app.use(express.static('public'));
-const path = require('path');
+// ─── Serve Frontend Static Files ────────────────────────────────────────────
+// Serves login.html, dashboard.html, admin.js, styles.css from /public
+app.use(express.static(path.join(__dirname, 'public')));
 
-// 3. Define Routes (We will fill these files in Day 2)
-// For now, these lines are commented out so the server doesn't crash
-// app.use('/api/auth', require('./auth/routes'));
-// app.use('/api/jobs', require('./jobs/routes'));
-// app.use('/api/applications', require('./applications/routes'));
-// app.use('/api/admin', require('./admin/routes'));
+// ─── API Routes ──────────────────────────────────────────────────────────────
+app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/admin/jobs', require('./routes/jobRoutes'));
+app.use('/api/admin/applications', require('./routes/applicationRoutes'));
 
 const PORT = process.env.PORT || 5000;
 
-// 3. Define Routes
-const jobRoutes = require('./routes/jobs');
-app.use('/api/jobs', jobRoutes);
-
-const applicationRoutes = require('./routes/applications');
-app.use('/api/applications', applicationRoutes);
-
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
-
-app.use('/api/admin', require('./routes/admin'));
-
-
-// ... other middleware
-app.use(express.json());
-
-// Add this line to serve Lavanya's public folder
-app.use(express.static(path.join(__dirname, 'public'))); 
-
